@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Caça ao Tesouro</title>
+  <style>
+    /* Design System & Custom Properties */
+    :root {
+      --bg-main: #0b0f19;       /* Deep space dark blue */
+      --bg-card: #161e2e;       /* Card background */
+      --text-main: #f8fafc;     /* Bright slate text */
+      --text-muted: #94a3b8;    /* Muted slate text */
+      --accent: #f59e0b;        /* Gold / Amber */
+      --accent-hover: #d97706;  /* Darker amber */
+      --accent-light: #fef08a;  /* Light yellow for glows */
+      --error: #ef4444;         /* Error red */
+      --success: #10b981;       /* Success emerald */
+      --input-bg: #0b0f19;      /* Background for inputs */
+      --input-border: #374151;  /* Slate-700 */
+    }
+
+    /* CSS Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1.25rem;
+      overflow-x: hidden;
+    }
+
+    /* Outer Wrapper for exact centering & size restriction */
+    .game-wrapper {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Header Title */
+    .game-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .game-header h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--text-main) 60%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.25rem;
+    }
+
+    .game-header p {
+      font-size: 0.813rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* Main Content Card */
+    .game-card {
+      background-color: var(--bg-card);
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+      width: 100%;
+      padding: 2rem 1.5rem;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      text-align: center;
+      overflow: hidden;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Screen Configurations */
+    .screen {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Tags & Labels */
+    .phase-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background-color: rgba(245, 158, 11, 0.1);
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      display: inline-block;
+    }
+
+    .enigma-box {
+      width: 100%;
+    }
+
+    .enigma-text {
+      font-size: 1.125rem;
+      line-height: 1.6;
+      color: var(--text-main);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Forms and Inputs */
+    .form-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .input-field-group {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+      text-align: left;
+    }
+
+    .input-field-group label {
+      font-size: 0.813rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      color: var(--text-main);
+      background-color: var(--input-bg);
+      border: 2px solid var(--input-border);
+      border-radius: 0.875rem;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      font-weight: 500;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    button.btn-submit {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--bg-main);
+      background-color: var(--accent);
+      border: none;
+      border-radius: 0.875rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    button.btn-submit:active {
+      transform: scale(0.98);
+      background-color: var(--accent-hover);
+    }
+
+    /* Success / Revealed Section */
+    .success-container {
+      display: none;
+      opacity: 0;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .success-container.active {
+      display: flex;
+      animation: screenFadeIn 0.6s forwards ease-out;
+    }
+
+    .success-message {
+      font-size: 0.938rem;
+      line-height: 1.6;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    /* Giant message for final phase */
+    .final-screen-active {
+      background-color: var(--bg-card) !important;
+      position: absolute !important;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 10;
+      padding: 2.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .giant-success-message {
+      font-size: 1.5rem;
+      font-weight: 900;
+      line-height: 1.4;
+      text-align: center;
+      color: var(--accent);
+      text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+      max-width: 320px;
+      margin-top: 1.5rem;
+    }
+
+    /* Animation effects */
+    .fade-out {
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+    }
+
+    .shake {
+      animation: shakeInput 0.4s ease-in-out;
+      border-color: var(--error) !important;
+      box-shadow: 0 0 0 1px var(--error) !important;
+    }
+
+    @keyframes shakeInput {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    @keyframes screenFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* SVG Styling & Animations */
+    .svg-illustration {
+      max-width: 100%;
+      height: auto;
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
+    }
+
+    /* Home scan line animation */
+    @keyframes scanAnimation {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(120px); }
+    }
+    .scan-line {
+      animation: scanAnimation 3.5s infinite ease-in-out;
+    }
+
+    /* Camera flash trigger */
+    @keyframes flashAnimation {
+      0% { opacity: 0; transform: scale(0.5); }
+      10% { opacity: 1; transform: scale(1.6); }
+      20% { opacity: 0.1; transform: scale(1.1); }
+      30% { opacity: 0.9; transform: scale(1.4); }
+      100% { opacity: 0; transform: scale(1); }
+    }
+    .camera-flash-glow {
+      transform-origin: 145px 81px;
+      opacity: 0;
+    }
+    .camera-flash-active {
+      animation: flashAnimation 0.9s ease-out forwards;
+    }
+
+    /* Steaming cup animation */
+    @keyframes steamRise {
+      0% { transform: translateY(6px); opacity: 0; }
+      50% { opacity: 0.5; }
+      100% { transform: translateY(-8px); opacity: 0; }
+    }
+    .steam-line {
+      animation: steamRise 2.5s infinite ease-in-out;
+      transform-origin: bottom center;
+    }
+    .steam-1 { animation-delay: 0s; }
+    .steam-2 { animation-delay: 0.8s; }
+    .steam-3 { animation-delay: 1.6s; }
+
+    /* Open door perspective styling */
+    .door-svg {
+      overflow: visible;
+    }
+    .door-panel {
+      transform-origin: 45px center;
+      transition: transform 2.2s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    .door-svg.door-opened .door-panel {
+      transform: rotateY(-80deg);
+      filter: drop-shadow(6px 0px 8px rgba(0,0,0,0.5));
+    }
+    @keyframes raysRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .door-svg .glow-rays {
+      transform-origin: 100px 105px;
+      opacity: 0;
+      transition: opacity 1s ease 0.5s;
+    }
+    .door-svg.door-opened .glow-rays {
+      opacity: 0.9;
+      animation: raysRotate 25s infinite linear;
+    }
+
+    /* Footer styling */
+    .game-footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-wrapper">
+    <header class="game-header">
+      <h1>Caça ao Tesouro</h1>
+      <p>Operação Secreta</p>
+    </header>
+
+    <main class="game-card">
+
+      <!-- ================= TELA INICIAL (SEM PARAMETRO) ================= -->
+      <section id="screen-home" class="screen hidden">
+        <div class="phase-tag">Sistema</div>
+        <div class="enigma-box">
+          <p class="enigma-text">Escaneie o QR Code</p>
+          <p style="color: var(--text-muted); font-size: 0.938rem; line-height: 1.5;">Para revelar o próximo enigma do jogo, use o QR Code localizado na pista.</p>
+        </div>
+        
+        <!-- Scan QR Code SVG -->
+        <svg class="svg-illustration" viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
+          <!-- Brackets -->
+          <path d="M 40,60 L 40,40 L 60,40" stroke="var(--accent)" stroke-width="4" fill="none" stroke-linecap="round" />
+          <path d="M 140,40 L 160,40 L 160,60" stroke="var(--accent)" stroke-width="4" fill="none" stroke-linecap="round" />
+          <path d="M 40,140 L 40,160 L 60,160" stroke="var(--accent)" stroke-width="4" fill="none" stroke-linecap="round" />
+          <path d="M 160,140 L 160,160 L 140,160" stroke="var(--accent)" stroke-width="4" fill="none" stroke-linecap="round" />
+          
+          <!-- Finder Top Left -->
+          <rect x="55" y="55" width="26" height="26" rx="3" fill="#475569" />
+          <rect x="61" y="61" width="14" height="14" rx="1" fill="#161e2e" />
+          <rect x="65" y="65" width="6" height="6" rx="0.5" fill="#475569" />
+          
+          <!-- Finder Top Right -->
+          <rect x="119" y="55" width="26" height="26" rx="3" fill="#475569" />
+          <rect x="125" y="61" width="14" height="14" rx="1" fill="#161e2e" />
+          <rect x="129" y="65" width="6" height="6" rx="0.5" fill="#475569" />
+          
+          <!-- Finder Bottom Left -->
+          <rect x="55" y="119" width="26" height="26" rx="3" fill="#475569" />
+          <rect x="61" y="125" width="14" height="14" rx="1" fill="#161e2e" />
+          <rect x="65" y="129" width="6" height="6" rx="0.5" fill="#475569" />
+          
+          <!-- Mini QR blocks -->
+          <rect x="91" y="55" width="8" height="8" rx="1" fill="#475569" />
+          <rect x="101" y="67" width="8" height="8" rx="1" fill="#475569" />
+          <rect x="91" y="79" width="18" height="8" rx="1" fill="#475569" />
+          <rect x="119" y="91" width="8" height="18" rx="1" fill="#475569" />
+          <rect x="55" y="91" width="18" height="8" rx="1" fill="#475569" />
+          <rect x="91" y="119" width="18" height="8" rx="1" fill="#475569" />
+          <rect x="119" y="119" width="8" height="8" rx="1" fill="#475569" />
+          <rect x="129" y="129" width="16" height="8" rx="1" fill="#475569" />
+          <rect x="101" y="137" width="8" height="8" rx="1" fill="#475569" />
+          
+          <!-- Scan Line -->
+          <line class="scan-line" x1="30" y1="40" x2="170" y2="40" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+        </svg>
+      </section>
+
+      <!-- ================= FASE 1 (?fase=1) ================= -->
+      <section id="screen-fase-1" class="screen hidden">
+        <div class="phase-tag">Fase 1</div>
+        
+        <div id="form-container-1" class="form-container">
+          <div class="enigma-box">
+            <p class="enigma-text">Tenho caminhos, mas não tenho estradas. Tenho cidades, mas não tenho casas. Quem sou eu?</p>
+          </div>
+          <form id="form-1" class="input-field-group">
+            <label for="input-1">Sua resposta</label>
+            <input type="text" id="input-1" autocomplete="off" placeholder="Digite aqui..." required>
+            <button type="submit" class="btn-submit" style="margin-top: 0.5rem;">Verificar</button>
+          </form>
+        </div>
+
+        <div id="success-container-1" class="success-container">
+          <!-- Parchment Map SVG -->
+          <svg class="svg-illustration" viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
+            <rect x="25" y="25" width="150" height="150" rx="16" fill="#1f2937" stroke="#374151" stroke-width="3" />
+            
+            <!-- Map islands -->
+            <path d="M 45,60 C 55,50 75,52 80,68 C 85,84 65,96 50,92 C 35,88 35,70 45,60 Z" fill="#374151" opacity="0.6" />
+            <path d="M 120,110 C 130,98 155,102 160,118 C 165,134 148,150 132,146 C 118,142 112,122 120,110 Z" fill="#374151" opacity="0.6" />
+            
+            <!-- Compass Rose -->
+            <circle cx="150" cy="55" r="14" fill="none" stroke="#4b5563" stroke-width="2" />
+            <path d="M 150,45 L 150,65 M 140,55 L 160,55" stroke="#4b5563" stroke-width="1.5" />
+            <path d="M 150,45 L 153,55 L 150,58 L 147,55 Z" fill="var(--accent)" />
+            
+            <!-- Dotted Path -->
+            <path d="M 60,80 C 80,80 90,120 110,120 C 130,120 120,135 140,130" stroke="var(--accent)" stroke-width="3" stroke-dasharray="6 6" fill="none" stroke-linecap="round" />
+            
+            <!-- Red X -->
+            <path d="M 135,125 L 145,135 M 145,125 L 135,135" stroke="var(--error)" stroke-width="4" stroke-linecap="round" />
+          </svg>
+          <p class="success-message">Você acertou! Guarde bem essa palavra, pois ela será parte da chave final. Aguarde o próximo enigma.</p>
+        </div>
+      </section>
+
+      <!-- ================= FASE 2 (?fase=2) ================= -->
+      <section id="screen-fase-2" class="screen hidden">
+        <div class="phase-tag">Fase 2</div>
+
+        <div id="form-container-2" class="form-container">
+          <div class="enigma-box">
+            <p class="enigma-text">Guardo memórias sem falar nada, congelo o tempo com uma piscada. O que sou?</p>
+          </div>
+          <form id="form-2" class="input-field-group">
+            <label for="input-2">Sua resposta</label>
+            <input type="text" id="input-2" autocomplete="off" placeholder="Digite aqui..." required>
+            <button type="submit" class="btn-submit" style="margin-top: 0.5rem;">Verificar</button>
+          </form>
+        </div>
+
+        <div id="success-container-2" class="success-container">
+          <!-- Camera SVG -->
+          <svg class="svg-illustration" viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="145" cy="81" r="50" fill="url(#flash-glow)" opacity="0" class="camera-flash-glow" />
+            
+            <!-- Camera body -->
+            <rect x="35" y="65" width="130" height="80" rx="12" fill="#1f2937" stroke="#374151" stroke-width="3" />
+            <path d="M 75,65 L 85,52 L 115,52 L 125,65 Z" fill="#111827" stroke="#374151" stroke-width="3" stroke-linejoin="round" />
+            
+            <!-- Shutter -->
+            <rect x="48" y="56" width="18" height="9" rx="2" fill="var(--error)" />
+            <!-- Flash window -->
+            <rect x="133" y="74" width="20" height="12" rx="2" fill="#4b5563" />
+            <rect x="136" y="77" width="14" height="6" rx="1" fill="#f1f5f9" />
+            
+            <!-- Lens -->
+            <circle cx="100" cy="108" r="30" fill="#111827" stroke="#374151" stroke-width="4" />
+            <circle cx="100" cy="108" r="20" fill="#0b0f19" />
+            <circle cx="105" cy="103" r="3" fill="#f1f5f9" opacity="0.8" />
+            
+            <!-- Red status led -->
+            <circle cx="58" cy="80" r="3" fill="var(--error)" />
+
+            <defs>
+              <radialGradient id="flash-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="1" />
+                <stop offset="40%" stop-color="var(--accent-light)" stop-opacity="0.8" />
+                <stop offset="100%" stop-color="var(--accent-light)" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+          </svg>
+          <p class="success-message">Você acertou! Mais uma palavra para o cofre. Guarde-a e aguarde o próximo enigma.</p>
+        </div>
+      </section>
+
+      <!-- ================= FASE 3 (?fase=3) ================= -->
+      <section id="screen-fase-3" class="screen hidden">
+        <div class="phase-tag">Fase 3</div>
+
+        <div id="form-container-3" class="form-container">
+          <div class="enigma-box">
+            <p class="enigma-text">Preto como a noite, quente como o inferno, puro como um anjo, doce como o amor. Que bebida sou eu?</p>
+          </div>
+          <form id="form-3" class="input-field-group">
+            <label for="input-3">Sua resposta</label>
+            <input type="text" id="input-3" autocomplete="off" placeholder="Digite aqui..." required>
+            <button type="submit" class="btn-submit" style="margin-top: 0.5rem;">Verificar</button>
+          </form>
+        </div>
+
+        <div id="success-container-3" class="success-container">
+          <!-- Coffee Mug SVG -->
+          <svg class="svg-illustration" viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
+            <!-- Saucer -->
+            <ellipse cx="100" cy="142" rx="55" ry="9" fill="#1f2937" />
+            
+            <!-- Cup Handle -->
+            <path d="M 132,95 C 150,95 150,122 132,122" stroke="#374151" stroke-width="8" fill="none" stroke-linecap="round" />
+            <path d="M 132,95 C 145,95 145,122 132,122" stroke="#1f2937" stroke-width="4" fill="none" stroke-linecap="round" />
+            
+            <!-- Cup Body -->
+            <path d="M 64,85 L 136,85 C 136,122 126,132 100,132 C 74,132 64,122 64,85 Z" fill="#1f2937" stroke="#374151" stroke-width="3" stroke-linejoin="round" />
+            
+            <!-- Coffee -->
+            <ellipse cx="100" cy="85" rx="34" ry="5" fill="#451a03" />
+            <ellipse cx="97" cy="86" rx="27" ry="2.5" fill="#78350f" />
+            
+            <!-- Rising steam -->
+            <g class="steam-group">
+              <path class="steam-line steam-1" d="M 85,70 C 80,55 90,45 85,30" stroke="#6b7280" stroke-width="2.5" fill="none" stroke-linecap="round" />
+              <path class="steam-line steam-2" d="M 100,70 C 95,50 105,40 100,20" stroke="#6b7280" stroke-width="2.5" fill="none" stroke-linecap="round" />
+              <path class="steam-line steam-3" d="M 115,70 C 110,55 120,45 115,30" stroke="#6b7280" stroke-width="2.5" fill="none" stroke-linecap="round" />
+            </g>
+          </svg>
+          <p class="success-message">Você acertou! Você já tem as 3 chaves. A próxima parada é a revelação final.</p>
+        </div>
+      </section>
+
+      <!-- ================= FASE FINAL (?fase=final) ================= -->
+      <section id="screen-fase-final" class="screen hidden">
+        <div class="phase-tag">Fase Final</div>
+
+        <div id="form-container-final" class="form-container">
+          <div class="enigma-box">
+            <p class="enigma-text">Qual é a Senha Mestra?</p>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">Junte as 3 chaves que você encontrou na ordem das fases.</p>
+          </div>
+          <form id="form-final" class="input-field-group">
+            <label for="input-final">Senha Mestra</label>
+            <input type="text" id="input-final" autocomplete="off" placeholder="Digite a senha..." required>
+            <button type="submit" class="btn-submit" style="margin-top: 0.5rem;">Destravar Cofre</button>
+          </form>
+        </div>
+
+        <div id="success-container-final" class="success-container">
+          <!-- Opening Door SVG (3D perspective swing) -->
+          <svg class="svg-illustration door-svg" viewBox="0 0 200 200" width="170" height="170" xmlns="http://www.w3.org/2000/svg" style="perspective: 600px;">
+            <!-- Outer Wall Frame -->
+            <rect x="30" y="20" width="140" height="160" fill="#111827" rx="6" />
+            
+            <!-- Interior light beam -->
+            <rect x="46" y="31" width="108" height="149" fill="url(#door-glow)" rx="2" />
+            
+            <!-- Radiating beams / Rotating sunburst -->
+            <g class="glow-rays">
+              <circle cx="100" cy="105" r="45" fill="none" stroke="var(--accent-light)" stroke-dasharray="8 8" stroke-width="4" />
+              <circle cx="100" cy="105" r="65" fill="none" stroke="var(--accent)" stroke-dasharray="14 14" stroke-width="2" />
+            </g>
+            
+            <!-- Architrave / Frame trim -->
+            <rect x="42" y="27" width="116" height="153" fill="none" stroke="#374151" stroke-width="3" rx="3" />
+            
+            <!-- Door Panel -->
+            <g class="door-panel">
+              <rect x="45" y="30" width="110" height="150" fill="#1f2937" stroke="#374151" stroke-width="2.5" rx="3" />
+              <!-- Upper panel inset -->
+              <rect x="56" y="42" width="88" height="52" fill="#111827" rx="2" stroke="#374151" stroke-width="1" />
+              <!-- Lower panel inset -->
+              <rect x="56" y="108" width="88" height="60" fill="#111827" rx="2" stroke="#374151" stroke-width="1" />
+              <!-- Handle -->
+              <circle cx="138" cy="105" r="4.5" fill="var(--accent)" />
+              <path d="M 138,105 L 145,105" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" />
+            </g>
+            
+            <defs>
+              <radialGradient id="door-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ffffff" />
+                <stop offset="35%" stop-color="var(--accent-light)" />
+                <stop offset="70%" stop-color="var(--accent)" />
+                <stop offset="100%" stop-color="#78350f" />
+              </radialGradient>
+            </defs>
+          </svg>
+          <h2 class="giant-success-message">A SUA SURPRESA TE ESPERA ATRÁS DA PORTA DA SUA CASA.</h2>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="game-footer">
+      <p>&copy; 2026 Operação Caça ao Tesouro</p>
+    </footer>
+  </div>
+
+  <script>
+    // 1. Sanitization function: minúsculas, remover espaços, remover acentuação
+    function sanitizeInput(text) {
+      if (!text) return "";
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '') // remove todos os espaços internos
+        .normalize('NFD')    // divide letras de acentos
+        .replace(/[\u0300-\u036f]/g, ''); // remove diacríticos
+    }
+
+    // 2. Map of phases screens & details
+    const screens = {
+      '1': document.getElementById('screen-fase-1'),
+      '2': document.getElementById('screen-fase-2'),
+      '3': document.getElementById('screen-fase-3'),
+      'final': document.getElementById('screen-fase-final'),
+      'home': document.getElementById('screen-home')
+    };
+
+    // 3. Routing: Reads the ?fase= parameter and displays appropriate section
+    function routeCurrentPhase() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentFase = urlParams.get('fase');
+
+      // Hide all screens
+      Object.values(screens).forEach(scr => {
+        if (scr) scr.classList.add('hidden');
+      });
+
+      // Show requested or default screen
+      if (currentFase && screens[currentFase]) {
+        screens[currentFase].classList.remove('hidden');
+      } else {
+        screens['home'].classList.remove('hidden');
+      }
+    }
+
+    // 4. Handle Submission Validation
+    function setupValidation() {
+      // Config mapping for validator
+      const validatorConfigs = [
+        {
+          formId: 'form-1',
+          inputId: 'input-1',
+          answer: 'mapa',
+          formContainerId: 'form-container-1',
+          successContainerId: 'success-container-1'
+        },
+        {
+          formId: 'form-2',
+          inputId: 'input-2',
+          answer: 'foto',
+          formContainerId: 'form-container-2',
+          successContainerId: 'success-container-2',
+          onSuccess: () => {
+            // Trigger Flash Animation
+            const flash = document.querySelector('.camera-flash-glow');
+            if (flash) {
+              // Reset standard styling and apply active
+              flash.classList.remove('camera-flash-active');
+              void flash.offsetWidth; // Trigger reflow
+              flash.classList.add('camera-flash-active');
+            }
+          }
+        },
+        {
+          formId: 'form-3',
+          inputId: 'input-3',
+          answer: 'cafe',
+          formContainerId: 'form-container-3',
+          successContainerId: 'success-container-3'
+        },
+        {
+          formId: 'form-final',
+          inputId: 'input-final',
+          answer: 'mapafotocafe',
+          formContainerId: 'form-container-final',
+          successContainerId: 'success-container-final',
+          onSuccess: () => {
+            // Apply special layout styles to the success screen for giant presentation
+            const mainCard = document.querySelector('.game-card');
+            const finalSuccess = document.getElementById('success-container-final');
+            
+            // Expand card to fit final message nicely or apply special backdrop
+            finalSuccess.classList.add('final-screen-active');
+            
+            // Trigger door open 3D transition
+            setTimeout(() => {
+              const door = document.querySelector('.door-svg');
+              if (door) {
+                door.classList.add('door-opened');
+              }
+            }, 250);
+          }
+        }
+      ];
+
+      validatorConfigs.forEach(cfg => {
+        const form = document.getElementById(cfg.formId);
+        if (!form) return;
+
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const input = document.getElementById(cfg.inputId);
+          const sanitizedVal = sanitizeInput(input.value);
+
+          if (sanitizedVal === cfg.answer) {
+            // Trigger fade out of form
+            const formContainer = document.getElementById(cfg.formContainerId);
+            formContainer.classList.add('fade-out');
+
+            setTimeout(() => {
+              formContainer.classList.add('hidden');
+              
+              const successContainer = document.getElementById(cfg.successContainerId);
+              successContainer.classList.remove('hidden');
+              
+              // Force reflow
+              void successContainer.offsetWidth;
+              successContainer.classList.add('active');
+              
+              if (cfg.onSuccess) {
+                cfg.onSuccess();
+              }
+            }, 400);
+          } else {
+            // Trigger Shake CSS animation
+            input.classList.remove('shake');
+            void input.offsetWidth; // Trigger layout reflow to replay shake
+            input.classList.add('shake');
+            
+            // Clean up field as requested
+            input.value = '';
+            
+            // Remove shake after animation completes
+            setTimeout(() => {
+              input.classList.remove('shake');
+            }, 400);
+          }
+        });
+      });
+    }
+
+    // Initialize SPA
+    window.addEventListener('DOMContentLoaded', () => {
+      routeCurrentPhase();
+      setupValidation();
+    });
+  </script>
+</body>
+</html>
