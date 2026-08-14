@@ -269,15 +269,6 @@
       filter: drop-shadow(0 8px 12px rgba(0,0,0,0.3));
     }
 
-    /* Home scan line animation */
-    @keyframes scanAnimation {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(120px); }
-    }
-    .scan-line {
-      animation: scanAnimation 3.5s infinite ease-in-out;
-    }
-
     /* Camera flash trigger */
     @keyframes flashAnimation {
       0% { opacity: 0; transform: scale(0.5); }
@@ -374,49 +365,43 @@
 
       <!-- ================= TELA INICIAL (SEM PARAMETRO) ================= -->
       <section id="screen-home" class="screen hidden">
-        <div class="phase-tag">Sistema</div>
-        <div class="enigma-box">
-          <p class="enigma-text">Escaneie o QR Code</p>
-          <p style="color: var(--text-muted); font-size: 0.938rem; line-height: 1.5;">Para revelar o próximo enigma do jogo, use o QR Code localizado na pista.</p>
-        </div>
+        <div class="phase-tag" style="background-color: rgba(239, 68, 68, 0.12); color: var(--error);">Preparação Obrigatória</div>
         
-        <!-- Scan QR Code SVG -->
-        <svg class="svg-illustration" viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
-          <!-- Brackets -->
-          <path d="M 40,60 L 40,40 L 60,40" stroke="var(--accent)" stroke-width="4" fill="none" stroke-linecap="round" />
-          <path d="M 140,40 L 160,40 L 160,60" stroke="var(--accent)" stroke-width="4" fill="none" stroke-linecap="round" />
-          <path d="M 40,140 L 40,160 L 60,160" stroke="var(--accent)" stroke-width="4" fill="none" stroke-linecap="round" />
-          <path d="M 160,140 L 160,160 L 140,160" stroke="var(--accent)" stroke-width="4" fill="none" stroke-linecap="round" />
-          
-          <!-- Finder Top Left -->
-          <rect x="55" y="55" width="26" height="26" rx="3" fill="#475569" />
-          <rect x="61" y="61" width="14" height="14" rx="1" fill="#161e2e" />
-          <rect x="65" y="65" width="6" height="6" rx="0.5" fill="#475569" />
-          
-          <!-- Finder Top Right -->
-          <rect x="119" y="55" width="26" height="26" rx="3" fill="#475569" />
-          <rect x="125" y="61" width="14" height="14" rx="1" fill="#161e2e" />
-          <rect x="129" y="65" width="6" height="6" rx="0.5" fill="#475569" />
-          
-          <!-- Finder Bottom Left -->
-          <rect x="55" y="119" width="26" height="26" rx="3" fill="#475569" />
-          <rect x="61" y="125" width="14" height="14" rx="1" fill="#161e2e" />
-          <rect x="65" y="129" width="6" height="6" rx="0.5" fill="#475569" />
-          
-          <!-- Mini QR blocks -->
-          <rect x="91" y="55" width="8" height="8" rx="1" fill="#475569" />
-          <rect x="101" y="67" width="8" height="8" rx="1" fill="#475569" />
-          <rect x="91" y="79" width="18" height="8" rx="1" fill="#475569" />
-          <rect x="119" y="91" width="8" height="18" rx="1" fill="#475569" />
-          <rect x="55" y="91" width="18" height="8" rx="1" fill="#475569" />
-          <rect x="91" y="119" width="18" height="8" rx="1" fill="#475569" />
-          <rect x="119" y="119" width="8" height="8" rx="1" fill="#475569" />
-          <rect x="129" y="129" width="16" height="8" rx="1" fill="#475569" />
-          <rect x="101" y="137" width="8" height="8" rx="1" fill="#475569" />
-          
-          <!-- Scan Line -->
-          <line class="scan-line" x1="30" y1="40" x2="170" y2="40" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" opacity="0.8" />
+        <!-- Video camera / reaction icon SVG -->
+        <svg class="svg-illustration" viewBox="0 0 200 200" width="140" height="140" xmlns="http://www.w3.org/2000/svg">
+          <!-- Stand/Tripod -->
+          <path d="M 100,120 L 70,175 M 100,120 L 130,175 M 100,120 L 100,175" stroke="#475569" stroke-width="4" stroke-linecap="round" />
+          <!-- Camera Body -->
+          <rect x="55" y="60" width="70" height="50" rx="6" fill="#1f2937" stroke="#374151" stroke-width="3" />
+          <!-- Lens -->
+          <path d="M 125,70 L 145,55 L 145,115 L 125,100 Z" fill="#111827" stroke="#374151" stroke-width="3" stroke-linejoin="round" />
+          <!-- Recording Red Dot -->
+          <circle cx="75" cy="85" r="6" fill="var(--error)">
+            <animate attributeName="opacity" values="0.2;1;0.2" dur="1.5s" repeatCount="indefinite" />
+          </circle>
+          <!-- REC text -->
+          <text x="90" y="92" fill="var(--text-main)" font-size="12" font-weight="bold" font-family="monospace">REC</text>
         </svg>
+
+        <div class="enigma-box" style="text-align: left; padding: 0 0.5rem;">
+          <p class="enigma-text" style="text-align: center; font-size: 1.25rem;">Grave Suas Reações!</p>
+          <p style="color: var(--text-muted); font-size: 0.938rem; line-height: 1.6; margin-bottom: 0.75rem;">
+            Antes de iniciar a caça ao tesouro, **você precisa de um cinegrafista!** Peça para a pessoa ao seu lado preparar a câmera do celular para gravar as suas reações a cada pista recebida.
+          </p>
+          <p style="color: var(--text-muted); font-size: 0.938rem; line-height: 1.6;">
+            A sua jornada só continuará se você enviar os vídeos (ou prints provando a gravação) para validar o seu progresso com a organização do jogo.
+          </p>
+        </div>
+
+        <div style="width: 100%; border-top: 1px dashed var(--input-border); padding-top: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+          <p style="color: var(--error); font-size: 0.813rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.4;">
+            ⚠️ ATENÇÃO: Só clique no botão abaixo se a câmera já estiver ligada te gravando!
+          </p>
+          
+          <button id="btn-start-game" class="btn-submit" style="background-color: var(--error); color: white;">
+            Câmera Pronta! Iniciar Jogo
+          </button>
+        </div>
       </section>
 
       <!-- ================= TELA DE BLOQUEIO POR TEMPO ================= -->
@@ -497,6 +482,15 @@
             <path d="M 135,125 L 145,135 M 145,125 L 135,135" stroke="var(--error)" stroke-width="4" stroke-linecap="round" />
           </svg>
           <p class="success-message">Você acertou! Guarde bem essa palavra, pois ela será parte da chave final. Aguarde o próximo enigma.</p>
+          
+          <div style="margin-top: 0.5rem; width: 100%; border-top: 1px dashed var(--input-border); padding-top: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            <p style="color: var(--accent); font-size: 0.813rem; font-weight: 700; text-transform: uppercase; line-height: 1.4;">
+              📸 Só clique no botão abaixo se a câmera já estiver ligada te gravando!
+            </p>
+            <button class="btn-submit btn-next-phase" data-next="2" style="background-color: var(--accent); color: var(--bg-main);">
+              Liberar Próxima Fase
+            </button>
+          </div>
         </div>
       </section>
 
@@ -543,6 +537,15 @@
             </defs>
           </svg>
           <p class="success-message">Você acertou! Mais uma palavra para o cofre. Guarde-a e aguarde o próximo enigma.</p>
+          
+          <div style="margin-top: 0.5rem; width: 100%; border-top: 1px dashed var(--input-border); padding-top: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            <p style="color: var(--accent); font-size: 0.813rem; font-weight: 700; text-transform: uppercase; line-height: 1.4;">
+              📸 Só clique no botão abaixo se a câmera já estiver ligada te gravando!
+            </p>
+            <button class="btn-submit btn-next-phase" data-next="3" style="background-color: var(--accent); color: var(--bg-main);">
+              Liberar Próxima Fase
+            </button>
+          </div>
         </div>
       </section>
 
@@ -582,6 +585,15 @@
             </g>
           </svg>
           <p class="success-message">Você acertou! Você já tem as 3 chaves. A próxima parada é a revelação final.</p>
+          
+          <div style="margin-top: 0.5rem; width: 100%; border-top: 1px dashed var(--input-border); padding-top: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;">
+            <p style="color: var(--accent); font-size: 0.813rem; font-weight: 700; text-transform: uppercase; line-height: 1.4;">
+              📸 Só clique no botão abaixo se a câmera já estiver ligada te gravando!
+            </p>
+            <button class="btn-submit btn-next-phase" data-next="final" style="background-color: var(--accent); color: var(--bg-main);">
+              Liberar Fase Final
+            </button>
+          </div>
         </div>
       </section>
 
@@ -775,7 +787,7 @@
             routeCurrentPhase();
           }, 1200);
         } else {
-          // Error shake animation
+          // Error shake feedback
           input.classList.remove('shake');
           void input.offsetWidth;
           input.classList.add('shake');
@@ -1018,6 +1030,23 @@
     window.addEventListener('DOMContentLoaded', () => {
       routeCurrentPhase();
       setupValidation();
+
+      // Start game redirection
+      const btnStart = document.getElementById('btn-start-game');
+      if (btnStart) {
+        btnStart.onclick = () => {
+          window.location.search = '?fase=1';
+        };
+      }
+
+      // Next phase buttons redirect
+      const nextButtons = document.querySelectorAll('.btn-next-phase');
+      nextButtons.forEach(btn => {
+        btn.onclick = (e) => {
+          const nextVal = btn.getAttribute('data-next');
+          window.location.search = `?fase=${nextVal}`;
+        };
+      });
 
       // Reset button implementation
       document.getElementById('reset-game-btn').addEventListener('click', (e) => {
