@@ -334,6 +334,15 @@
       animation: raysRotate 25s infinite linear;
     }
 
+    /* Lock screen animations */
+    .lock-shackle {
+      transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transform-origin: 65px 90px;
+    }
+    .lock-unlocked .lock-shackle {
+      transform: translateY(-14px) rotate(-15deg);
+    }
+
     /* Footer styling */
     .game-footer {
       margin-top: 2rem;
@@ -341,6 +350,15 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       letter-spacing: 0.02em;
+    }
+    .game-footer a {
+      color: var(--text-muted);
+      text-decoration: underline;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .game-footer a:hover {
+      opacity: 1;
     }
   </style>
 </head>
@@ -401,6 +419,52 @@
         </svg>
       </section>
 
+      <!-- ================= TELA DE BLOQUEIO POR TEMPO ================= -->
+      <section id="screen-lock" class="screen hidden">
+        <div class="phase-tag" id="lock-phase-tag">Fase Bloqueada</div>
+        
+        <!-- Lock SVG -->
+        <svg class="svg-illustration lock-svg" viewBox="0 0 200 200" width="120" height="120" xmlns="http://www.w3.org/2000/svg">
+          <!-- Shackle (Arch) -->
+          <g class="lock-shackle">
+            <path d="M 65,90 L 65,65 A 35,35 0 0 1 135,65 L 135,90" stroke="#475569" stroke-width="8" fill="none" stroke-linecap="round" />
+          </g>
+          <!-- Lock Body -->
+          <rect x="45" y="85" width="110" height="80" rx="14" fill="#1f2937" stroke="#374151" stroke-width="3" />
+          <!-- Keyhole -->
+          <circle cx="100" cy="118" r="7" fill="#0b0f19" />
+          <path d="M 100,125 L 100,143" stroke="#0b0f19" stroke-width="5" stroke-linecap="round" />
+        </svg>
+
+        <div class="enigma-box">
+          <p class="enigma-text" id="lock-title">Aguardando Próxima Dica</p>
+          <p style="color: var(--text-muted); font-size: 0.938rem; margin-bottom: 0.5rem;">Sua próxima instrução será enviada em:</p>
+          <div id="lock-timer" style="font-size: 2.25rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums;">00:00</div>
+        </div>
+
+        <!-- Botão para ativar desafio físico -->
+        <div id="challenge-trigger-box" style="width: 100%;">
+          <button id="btn-show-challenge" class="btn-submit" style="background-color: transparent; border: 2px solid var(--accent); color: var(--accent);">
+            Acelerar Tempo (Cumprir Desafio)
+          </button>
+        </div>
+
+        <!-- Seção de inserção do código do desafio físico (inicialmente oculta) -->
+        <div id="challenge-box" class="hidden" style="width: 100%; display: flex; flex-direction: column; gap: 1.25rem; border-top: 1px dashed var(--input-border); padding-top: 1.25rem;">
+          <p id="challenge-desc" style="font-size: 0.875rem; color: var(--text-main); font-weight: 500; line-height: 1.5; text-align: left;"></p>
+          
+          <form id="form-challenge" class="input-field-group">
+            <label for="input-challenge-code">Código do Desafio</label>
+            <input type="text" id="input-challenge-code" autocomplete="off" placeholder="Digite o código..." required>
+            <button type="submit" class="btn-submit" style="margin-top: 0.5rem;">Validar Desafio</button>
+          </form>
+
+          <button id="btn-hide-challenge" style="background-color: transparent; border: none; color: var(--text-muted); font-size: 0.813rem; text-decoration: underline; cursor: pointer;">
+            Voltar ao Cronômetro
+          </button>
+        </div>
+      </section>
+
       <!-- ================= FASE 1 (?fase=1) ================= -->
       <section id="screen-fase-1" class="screen hidden">
         <div class="phase-tag">Fase 1</div>
@@ -420,19 +484,15 @@
           <!-- Parchment Map SVG -->
           <svg class="svg-illustration" viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
             <rect x="25" y="25" width="150" height="150" rx="16" fill="#1f2937" stroke="#374151" stroke-width="3" />
-            
             <!-- Map islands -->
             <path d="M 45,60 C 55,50 75,52 80,68 C 85,84 65,96 50,92 C 35,88 35,70 45,60 Z" fill="#374151" opacity="0.6" />
             <path d="M 120,110 C 130,98 155,102 160,118 C 165,134 148,150 132,146 C 118,142 112,122 120,110 Z" fill="#374151" opacity="0.6" />
-            
             <!-- Compass Rose -->
             <circle cx="150" cy="55" r="14" fill="none" stroke="#4b5563" stroke-width="2" />
             <path d="M 150,45 L 150,65 M 140,55 L 160,55" stroke="#4b5563" stroke-width="1.5" />
             <path d="M 150,45 L 153,55 L 150,58 L 147,55 Z" fill="var(--accent)" />
-            
             <!-- Dotted Path -->
             <path d="M 60,80 C 80,80 90,120 110,120 C 130,120 120,135 140,130" stroke="var(--accent)" stroke-width="3" stroke-dasharray="6 6" fill="none" stroke-linecap="round" />
-            
             <!-- Red X -->
             <path d="M 135,125 L 145,135 M 145,125 L 135,135" stroke="var(--error)" stroke-width="4" stroke-linecap="round" />
           </svg>
@@ -459,22 +519,18 @@
           <!-- Camera SVG -->
           <svg class="svg-illustration" viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
             <circle cx="145" cy="81" r="50" fill="url(#flash-glow)" opacity="0" class="camera-flash-glow" />
-            
             <!-- Camera body -->
             <rect x="35" y="65" width="130" height="80" rx="12" fill="#1f2937" stroke="#374151" stroke-width="3" />
             <path d="M 75,65 L 85,52 L 115,52 L 125,65 Z" fill="#111827" stroke="#374151" stroke-width="3" stroke-linejoin="round" />
-            
             <!-- Shutter -->
             <rect x="48" y="56" width="18" height="9" rx="2" fill="var(--error)" />
             <!-- Flash window -->
             <rect x="133" y="74" width="20" height="12" rx="2" fill="#4b5563" />
             <rect x="136" y="77" width="14" height="6" rx="1" fill="#f1f5f9" />
-            
             <!-- Lens -->
             <circle cx="100" cy="108" r="30" fill="#111827" stroke="#374151" stroke-width="4" />
             <circle cx="100" cy="108" r="20" fill="#0b0f19" />
             <circle cx="105" cy="103" r="3" fill="#f1f5f9" opacity="0.8" />
-            
             <!-- Red status led -->
             <circle cx="58" cy="80" r="3" fill="var(--error)" />
 
@@ -510,18 +566,14 @@
           <svg class="svg-illustration" viewBox="0 0 200 200" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
             <!-- Saucer -->
             <ellipse cx="100" cy="142" rx="55" ry="9" fill="#1f2937" />
-            
             <!-- Cup Handle -->
             <path d="M 132,95 C 150,95 150,122 132,122" stroke="#374151" stroke-width="8" fill="none" stroke-linecap="round" />
             <path d="M 132,95 C 145,95 145,122 132,122" stroke="#1f2937" stroke-width="4" fill="none" stroke-linecap="round" />
-            
             <!-- Cup Body -->
             <path d="M 64,85 L 136,85 C 136,122 126,132 100,132 C 74,132 64,122 64,85 Z" fill="#1f2937" stroke="#374151" stroke-width="3" stroke-linejoin="round" />
-            
             <!-- Coffee -->
             <ellipse cx="100" cy="85" rx="34" ry="5" fill="#451a03" />
             <ellipse cx="97" cy="86" rx="27" ry="2.5" fill="#78350f" />
-            
             <!-- Rising steam -->
             <g class="steam-group">
               <path class="steam-line steam-1" d="M 85,70 C 80,55 90,45 85,30" stroke="#6b7280" stroke-width="2.5" fill="none" stroke-linecap="round" />
@@ -554,19 +606,15 @@
           <svg class="svg-illustration door-svg" viewBox="0 0 200 200" width="170" height="170" xmlns="http://www.w3.org/2000/svg" style="perspective: 600px;">
             <!-- Outer Wall Frame -->
             <rect x="30" y="20" width="140" height="160" fill="#111827" rx="6" />
-            
             <!-- Interior light beam -->
             <rect x="46" y="31" width="108" height="149" fill="url(#door-glow)" rx="2" />
-            
             <!-- Radiating beams / Rotating sunburst -->
             <g class="glow-rays">
               <circle cx="100" cy="105" r="45" fill="none" stroke="var(--accent-light)" stroke-dasharray="8 8" stroke-width="4" />
               <circle cx="100" cy="105" r="65" fill="none" stroke="var(--accent)" stroke-dasharray="14 14" stroke-width="2" />
             </g>
-            
             <!-- Architrave / Frame trim -->
             <rect x="42" y="27" width="116" height="153" fill="none" stroke="#374151" stroke-width="3" rx="3" />
-            
             <!-- Door Panel -->
             <g class="door-panel">
               <rect x="45" y="30" width="110" height="150" fill="#1f2937" stroke="#374151" stroke-width="2.5" rx="3" />
@@ -578,7 +626,6 @@
               <circle cx="138" cy="105" r="4.5" fill="var(--accent)" />
               <path d="M 138,105 L 145,105" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" />
             </g>
-            
             <defs>
               <radialGradient id="door-glow" cx="50%" cy="50%" r="50%">
                 <stop offset="0%" stop-color="#ffffff" />
@@ -595,11 +642,14 @@
     </main>
 
     <footer class="game-footer">
-      <p>&copy; 2026 Operação Caça ao Tesouro</p>
+      <p>&copy; 2026 Operação Caça ao Tesouro | <a href="#" id="reset-game-btn">Reiniciar</a></p>
     </footer>
   </div>
 
   <script>
+    const STATE_KEY = 'caca_tesouro_state';
+    let timerInterval = null;
+
     // 1. Sanitization function: minúsculas, remover espaços, remover acentuação
     function sanitizeInput(text) {
       if (!text) return "";
@@ -611,38 +661,267 @@
         .replace(/[\u0300-\u036f]/g, ''); // remove diacríticos
     }
 
-    // 2. Map of phases screens & details
+    // 2. LocalStorage state handling
+    function loadState() {
+      const defaultState = {
+        completed: {},
+        unlock_time: {}
+      };
+      try {
+        const saved = localStorage.getItem(STATE_KEY);
+        return saved ? JSON.parse(saved) : defaultState;
+      } catch (e) {
+        return defaultState;
+      }
+    }
+
+    function saveState(state) {
+      try {
+        localStorage.setItem(STATE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    // 3. Screen and elements map
     const screens = {
       '1': document.getElementById('screen-fase-1'),
       '2': document.getElementById('screen-fase-2'),
       '3': document.getElementById('screen-fase-3'),
       'final': document.getElementById('screen-fase-final'),
-      'home': document.getElementById('screen-home')
+      'home': document.getElementById('screen-home'),
+      'lock': document.getElementById('screen-lock')
     };
 
-    // 3. Routing: Reads the ?fase= parameter and displays appropriate section
-    function routeCurrentPhase() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const currentFase = urlParams.get('fase');
-
-      // Hide all screens
-      Object.values(screens).forEach(scr => {
-        if (scr) scr.classList.add('hidden');
+    function showScreen(screenId) {
+      if (timerInterval) clearInterval(timerInterval);
+      
+      Object.entries(screens).forEach(([id, el]) => {
+        if (el) {
+          if (id === screenId) el.classList.remove('hidden');
+          else el.classList.add('hidden');
+        }
       });
+    }
 
-      // Show requested or default screen
-      if (currentFase && screens[currentFase]) {
-        screens[currentFase].classList.remove('hidden');
-      } else {
-        screens['home'].classList.remove('hidden');
+    function isFaseLocked(faseId, state) {
+      const unlockTime = state.unlock_time[faseId];
+      if (!unlockTime) return false;
+      return Date.now() < unlockTime;
+    }
+
+    // 4. Lock Screen logic with physical challenge bypass
+    function showLockScreen(faseId) {
+      showScreen('lock');
+
+      document.getElementById('lock-phase-tag').innerText = `Fase ${faseId === 'final' ? 'Final' : faseId} Bloqueada`;
+
+      const challengeDesc = document.getElementById('challenge-desc');
+      const challengeBox = document.getElementById('challenge-box');
+      const triggerBox = document.getElementById('challenge-trigger-box');
+      const lockSvg = document.querySelector('.lock-svg');
+      
+      // Reset layout state
+      challengeBox.classList.add('hidden');
+      triggerBox.classList.remove('hidden');
+      if (lockSvg) lockSvg.classList.remove('lock-unlocked');
+
+      // Define descriptions based on lock phase
+      if (faseId === '2') {
+        challengeDesc.innerText = 'Desafio: Vá até a cozinha, tire uma foto equilibrando uma colher no nariz e mande para o número de suporte. Digite o código de liberação recebido.';
+      } else if (faseId === '3') {
+        challengeDesc.innerText = 'Desafio: Procure na sua casa! Encontre um papel escondido atrás da televisão da sala de estar contendo a palavra-chave de liberação.';
+      } else if (faseId === 'final') {
+        challengeDesc.innerText = 'Desafio: Grave um áudio de 5 segundos cantando o refrão de uma música romântica e mande para o número de suporte para receber o código.';
+      }
+
+      // Toggle challenge modal
+      document.getElementById('btn-show-challenge').onclick = () => {
+        triggerBox.classList.add('hidden');
+        challengeBox.classList.remove('hidden');
+      };
+
+      document.getElementById('btn-hide-challenge').onclick = () => {
+        challengeBox.classList.add('hidden');
+        triggerBox.classList.remove('hidden');
+      };
+
+      // Handle challenge submission
+      const formChallenge = document.getElementById('form-challenge');
+      formChallenge.onsubmit = (e) => {
+        e.preventDefault();
+        const input = document.getElementById('input-challenge-code');
+        const sanitizedVal = sanitizeInput(input.value);
+        
+        let expectedCode = '';
+        if (faseId === '2') expectedCode = 'nariz';
+        else if (faseId === '3') expectedCode = 'televisao';
+        else if (faseId === 'final') expectedCode = 'musica';
+
+        if (sanitizedVal === expectedCode) {
+          // Trigger unlock animations
+          const state = loadState();
+          state.unlock_time[faseId] = 0; // set as unlocked
+          saveState(state);
+
+          if (timerInterval) clearInterval(timerInterval);
+
+          if (lockSvg) lockSvg.classList.add('lock-unlocked');
+
+          const timerDisplay = document.getElementById('lock-timer');
+          timerDisplay.innerText = 'DESBLOQUEADO!';
+          timerDisplay.style.color = 'var(--success)';
+
+          setTimeout(() => {
+            timerDisplay.style.color = '';
+            routeCurrentPhase();
+          }, 1200);
+        } else {
+          // Error shake animation
+          input.classList.remove('shake');
+          void input.offsetWidth;
+          input.classList.add('shake');
+          input.value = '';
+          setTimeout(() => {
+            input.classList.remove('shake');
+          }, 400);
+        }
+      };
+
+      // Timer loop
+      if (timerInterval) clearInterval(timerInterval);
+      
+      function updateTimer() {
+        const state = loadState();
+        const targetTime = state.unlock_time[faseId] || 0;
+        const remaining = targetTime - Date.now();
+
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          routeCurrentPhase();
+          return;
+        }
+
+        const minutes = Math.floor(remaining / (60 * 1000));
+        const seconds = Math.floor((remaining % (60 * 1000)) / 1000);
+        
+        const minStr = String(minutes).padStart(2, '0');
+        const secStr = String(seconds).padStart(2, '0');
+        
+        document.getElementById('lock-timer').innerText = `${minStr}:${secStr}`;
+      }
+
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    // 5. Success animations triggers
+    function triggerSuccessAnimations(faseId) {
+      if (faseId === '2') {
+        const flash = document.querySelector('.camera-flash-glow');
+        if (flash) {
+          flash.classList.remove('camera-flash-active');
+          void flash.offsetWidth;
+          flash.classList.add('camera-flash-active');
+        }
+      } else if (faseId === 'final') {
+        const finalSuccess = document.getElementById('success-container-final');
+        if (finalSuccess) {
+          finalSuccess.classList.add('final-screen-active');
+        }
+        setTimeout(() => {
+          const door = document.querySelector('.door-svg');
+          if (door) {
+            door.classList.add('door-opened');
+          }
+        }, 250);
       }
     }
 
-    // 4. Handle Submission Validation
+    // 6. Router based on URL parameter ?fase= and localStorage game state
+    function routeCurrentPhase() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentFase = urlParams.get('fase');
+      const state = loadState();
+
+      // If no phase parameter is present, show welcome home screen
+      if (!currentFase || !screens[currentFase] || currentFase === 'home') {
+        showScreen('home');
+        return;
+      }
+
+      // Linear lock gate verification redirects
+      if (currentFase === '2') {
+        if (!state.completed['1']) {
+          window.location.search = '?fase=1';
+          return;
+        }
+        if (isFaseLocked('2', state)) {
+          showLockScreen('2');
+          return;
+        }
+      } else if (currentFase === '3') {
+        if (!state.completed['1']) {
+          window.location.search = '?fase=1';
+          return;
+        }
+        if (!state.completed['2']) {
+          window.location.search = '?fase=2';
+          return;
+        }
+        if (isFaseLocked('3', state)) {
+          showLockScreen('3');
+          return;
+        }
+      } else if (currentFase === 'final') {
+        if (!state.completed['1']) {
+          window.location.search = '?fase=1';
+          return;
+        }
+        if (!state.completed['2']) {
+          window.location.search = '?fase=2';
+          return;
+        }
+        if (!state.completed['3']) {
+          window.location.search = '?fase=3';
+          return;
+        }
+        if (isFaseLocked('final', state)) {
+          showLockScreen('final');
+          return;
+        }
+      }
+
+      // Render the correct state for the unlocked active screen
+      const formContainer = document.getElementById(`form-container-${currentFase}`);
+      const successContainer = document.getElementById(`success-container-${currentFase}`);
+
+      if (state.completed[currentFase]) {
+        // If already solved, show solved state directly (preventing re-submission)
+        if (formContainer) formContainer.classList.add('hidden');
+        if (successContainer) {
+          successContainer.classList.remove('hidden');
+          void successContainer.offsetWidth;
+          successContainer.classList.add('active');
+          triggerSuccessAnimations(currentFase);
+        }
+      } else {
+        // If active but not solved, show input form
+        if (formContainer) formContainer.classList.remove('hidden');
+        if (successContainer) {
+          successContainer.classList.add('hidden');
+          successContainer.classList.remove('active');
+        }
+      }
+
+      showScreen(currentFase);
+    }
+
+    // 7. Enigmas validation setup
     function setupValidation() {
-      // Config mapping for validator
       const validatorConfigs = [
         {
+          faseId: '1',
+          nextFaseId: '2',
+          cooldownMin: 30,
           formId: 'form-1',
           inputId: 'input-1',
           answer: 'mapa',
@@ -650,23 +929,20 @@
           successContainerId: 'success-container-1'
         },
         {
+          faseId: '2',
+          nextFaseId: '3',
+          cooldownMin: 45,
           formId: 'form-2',
           inputId: 'input-2',
           answer: 'foto',
           formContainerId: 'form-container-2',
           successContainerId: 'success-container-2',
-          onSuccess: () => {
-            // Trigger Flash Animation
-            const flash = document.querySelector('.camera-flash-glow');
-            if (flash) {
-              // Reset standard styling and apply active
-              flash.classList.remove('camera-flash-active');
-              void flash.offsetWidth; // Trigger reflow
-              flash.classList.add('camera-flash-active');
-            }
-          }
+          onSuccess: () => triggerSuccessAnimations('2')
         },
         {
+          faseId: '3',
+          nextFaseId: 'final',
+          cooldownMin: 60,
           formId: 'form-3',
           inputId: 'input-3',
           answer: 'cafe',
@@ -674,27 +950,15 @@
           successContainerId: 'success-container-3'
         },
         {
+          faseId: 'final',
+          nextFaseId: null,
+          cooldownMin: 0,
           formId: 'form-final',
           inputId: 'input-final',
           answer: 'mapafotocafe',
           formContainerId: 'form-container-final',
           successContainerId: 'success-container-final',
-          onSuccess: () => {
-            // Apply special layout styles to the success screen for giant presentation
-            const mainCard = document.querySelector('.game-card');
-            const finalSuccess = document.getElementById('success-container-final');
-            
-            // Expand card to fit final message nicely or apply special backdrop
-            finalSuccess.classList.add('final-screen-active');
-            
-            // Trigger door open 3D transition
-            setTimeout(() => {
-              const door = document.querySelector('.door-svg');
-              if (door) {
-                door.classList.add('door-opened');
-              }
-            }, 250);
-          }
+          onSuccess: () => triggerSuccessAnimations('final')
         }
       ];
 
@@ -708,17 +972,26 @@
           const sanitizedVal = sanitizeInput(input.value);
 
           if (sanitizedVal === cfg.answer) {
-            // Trigger fade out of form
+            // Save state updates
+            const state = loadState();
+            state.completed[cfg.faseId] = true;
+            
+            // Set cooldown timer for the next phase
+            if (cfg.nextFaseId) {
+              state.unlock_time[cfg.nextFaseId] = Date.now() + (cfg.cooldownMin * 60 * 1000);
+            }
+            saveState(state);
+
+            // Trigger success transition
             const formContainer = document.getElementById(cfg.formContainerId);
             formContainer.classList.add('fade-out');
 
             setTimeout(() => {
               formContainer.classList.add('hidden');
+              formContainer.classList.remove('fade-out'); // Reset class
               
               const successContainer = document.getElementById(cfg.successContainerId);
               successContainer.classList.remove('hidden');
-              
-              // Force reflow
               void successContainer.offsetWidth;
               successContainer.classList.add('active');
               
@@ -727,15 +1000,12 @@
               }
             }, 400);
           } else {
-            // Trigger Shake CSS animation
+            // Error shake feedback
             input.classList.remove('shake');
-            void input.offsetWidth; // Trigger layout reflow to replay shake
+            void input.offsetWidth; // Force reflow
             input.classList.add('shake');
             
-            // Clean up field as requested
             input.value = '';
-            
-            // Remove shake after animation completes
             setTimeout(() => {
               input.classList.remove('shake');
             }, 400);
@@ -748,6 +1018,15 @@
     window.addEventListener('DOMContentLoaded', () => {
       routeCurrentPhase();
       setupValidation();
+
+      // Reset button implementation
+      document.getElementById('reset-game-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (confirm('Deseja mesmo reiniciar todo o progresso do jogo de caça ao tesouro?')) {
+          localStorage.removeItem(STATE_KEY);
+          window.location.search = '';
+        }
+      });
     });
   </script>
 </body>
