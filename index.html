@@ -422,7 +422,7 @@
         </svg>
 
         <div class="enigma-box">
-          <p class="enigma-text" id="lock-title">Aguardando Próxima Dica</p>
+          <p class="enigma-text" id="lock-title">Aguardando Próxima Pista</p>
           <p style="color: var(--text-muted); font-size: 0.938rem; margin-bottom: 0.5rem;">Sua próxima instrução será liberada automaticamente em:</p>
           <div id="lock-timer" style="font-size: 2.25rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums;">00:00</div>
         </div>
@@ -636,16 +636,15 @@
   </div>
 
   <script>
-    const STATE_KEY = 'caca_tesouro_state_v2'; // unique state key to avoid cache clashes
+    const STATE_KEY = 'caca_tesouro_state_v3'; // Unique key to force update state structure
     let timerInterval = null;
     let hintTimerInterval = null;
 
-    // 1. Game static configuration (answers, hints and challenges per phase)
+    // 1. Game static configuration (answers, hints and challenges per phase based on travel itinerary)
     const phasesData = {
       'omega': {
         name: 'Fase 1',
         nextId: 'prisma',
-        cooldownMin: 30,
         answer: 'mapa',
         hints: [
           "Tenho caminhos, mas não tenho estradas.",
@@ -654,19 +653,18 @@
         ],
         challenges: [
           {
-            desc: "Desafio 1: Vá até a cozinha, tire uma foto equilibrando uma colher no nariz por 5 segundos e envie para o número do suporte do caça ao tesouro. Insira o código recebido para liberar a Dica 2.",
-            code: 'nariz'
+            desc: "Desafio 1: Você está a caminho! Grave um vídeo curto cantando uma música de viagem animada ou faça uma pose com os dedos em formato de 'V' de vitória ao lado da janela do ônibus. Mande para o número de suporte para receber o código de liberação da Dica 2.",
+            code: 'derby'
           },
           {
-            desc: "Desafio 2: Encontre um objeto amarelo na sala, tire uma foto com ele fazendo uma careta engraçada e envie para o suporte. Digite o código de liberação recebido para ver a Dica 3.",
-            code: 'careta'
+            desc: "Desafio 2: Imite um pássaro voando na Rampa do Pepê! Mande uma foto ou vídeo curto simulando um voo livre com os braços abertos para o suporte. Digite o código recebido para liberar a Dica 3.",
+            code: 'pepe'
           }
         ]
       },
       'prisma': {
         name: 'Fase 2',
         nextId: 'aurora',
-        cooldownMin: 45,
         answer: 'foto',
         hints: [
           "Guardo memórias sem falar nada.",
@@ -675,19 +673,18 @@
         ],
         challenges: [
           {
-            desc: "Desafio 1: Procure na sua casa! Encontre um papel escondido atrás da televisão da sala de estar e digite o código escrito nele para liberar a Dica 2.",
-            code: 'televisao'
+            desc: "Desafio 1: Compre ou pegue um sequilho na fábrica Farias Biscoitos, coma-o inteiro de uma vez sem usar as mãos e filme! Mande o vídeo para o suporte para receber o código da Dica 2.",
+            code: 'sequilho'
           },
           {
-            desc: "Desafio 2: Faça 10 polichinelos na frente de quem está te gravando. Peça o código de liberação ao suporte e insira aqui para liberar a Dica 3.",
-            code: 'energia'
+            desc: "Desafio 2: Sítio Conceição! Imite o zumbido de uma abelha bem próximo ao ouvido de quem está gravando você por 3 segundos. Envie o vídeo para o suporte e insira o código de liberação para ver a Dica 3.",
+            code: 'abelha'
           }
         ]
       },
       'aurora': {
         name: 'Fase 3',
         nextId: 'nexus',
-        cooldownMin: 60,
         answer: 'cafe',
         hints: [
           "Preto como a noite, quente como o inferno.",
@@ -696,19 +693,18 @@
         ],
         challenges: [
           {
-            desc: "Desafio 1: Grave um áudio de 5 segundos cantando o refrão de uma música romântica e mande para o número de suporte para receber o código de liberação da Dica 2.",
-            code: 'musica'
+            desc: "Desafio 1: Chácara do Almoço (Bardigão)! Tire uma foto engraçada com um garfo e uma faca simulando ser um vampiro esfomeado. Envie para o suporte e digite o código recebido para liberar a Dica 2.",
+            code: 'bardigao'
           },
           {
-            desc: "Desafio 2: Vá até a gaveta de talheres e ache uma etiqueta adesiva colada embaixo de um garfo contendo o código da Dica 3.",
-            code: 'garfo'
+            desc: "Desafio 2: Sob a Sombra do Cajueiro (Café Guílla)! Tire uma foto debaixo da sombra de alguma árvore ou planta que encontrar no sítio, segurando uma folha ou fruta. Envie para o suporte para obter o código de liberação da Dica 3.",
+            code: 'cajueiro'
           }
         ]
       },
       'nexus': {
         name: 'Fase Final',
         nextId: null,
-        cooldownMin: 0,
         answer: 'mapafotocafe',
         hints: [
           "Qual é a Senha Mestra?",
@@ -750,6 +746,37 @@
       try {
         localStorage.setItem(STATE_KEY, JSON.stringify(state));
       } catch (e) {}
+    }
+
+    // Helper to check if it's the actual event day (August 15, 2026)
+    function isEventDayActive() {
+      const now = new Date();
+      // Year is 2026, month is August (7, 0-indexed), date is 15th or later
+      return (now.getFullYear() === 2026 && now.getMonth() === 7 && now.getDate() >= 15);
+    }
+
+    // Helper to calculate exact unlock timestamp for phases on August 15th, 2026
+    function getUnlockTime(faseId, solveTime) {
+      if (isEventDayActive()) {
+        const target = new Date(2026, 7, 15); // Aug 15, 2026
+        if (faseId === 'prisma') {
+          target.setHours(10, 30, 0, 0); // 10:30 AM
+        } else if (faseId === 'aurora') {
+          target.setHours(13, 15, 0, 0); // 13:15 PM
+        } else if (faseId === 'nexus') {
+          target.setHours(16, 30, 0, 0); // 16:30 PM (Sunset / Mirante)
+        }
+        return target.getTime();
+      } else {
+        // Testing mode: relative cooldown of 3 minutes between phases
+        const testingCooldownMs = 3 * 60 * 1000;
+        return solveTime + testingCooldownMs;
+      }
+    }
+
+    // Helper to calculate hint cooldown (45 mins on event day, 1 min on test day)
+    function getHintCooldownDuration() {
+      return isEventDayActive() ? (45 * 60 * 1000) : (1 * 60 * 1000);
     }
 
     // 4. Screens setup
@@ -836,7 +863,7 @@
       }
       
       let changed = false;
-      const HINT_COOLDOWN = 10 * 60 * 1000; // 10 minutes
+      const HINT_COOLDOWN = getHintCooldownDuration();
       
       while (state.hints_unlocked[faseId] < 3) {
         const startTime = state.hint_timer_start[faseId] || Date.now();
@@ -878,12 +905,13 @@
       if (unlockedCount < 3) {
         const nextIndex = unlockedCount; // 1 (Dica 2) or 2 (Dica 3)
         const challenge = phase.challenges[nextIndex - 1];
+        const defaultPlaceholder = isEventDayActive() ? "45:00" : "01:00";
         
         html += `
           <div id="hint-lock-container-${faseId}" style="border: 1px dashed var(--input-border); border-radius: 0.75rem; padding: 1rem; margin-top: 0.5rem; text-align: center;">
             <div id="hint-timer-box-${faseId}">
               <p style="color: var(--text-muted); font-size: 0.813rem; margin-bottom: 0.25rem; font-weight: 600; text-transform: uppercase;">Dica ${nextIndex + 1} Trancada</p>
-              <div id="hint-countdown-${faseId}" style="font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-bottom: 0.75rem; font-variant-numeric: tabular-nums;">10:00</div>
+              <div id="hint-countdown-${faseId}" style="font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-bottom: 0.75rem; font-variant-numeric: tabular-nums;">${defaultPlaceholder}</div>
               <button class="btn-submit" id="btn-challenge-hint-${faseId}" style="background-color: transparent; border: 1px solid var(--accent); color: var(--accent); font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 0.5rem; width: auto; font-weight: 600;">
                 Revelar Agora (Cumprir Desafio)
               </button>
@@ -974,7 +1002,7 @@
         }
         
         const startTime = state.hint_timer_start[faseId] || Date.now();
-        const HINT_COOLDOWN = 10 * 60 * 1000; // 10 minutes
+        const HINT_COOLDOWN = getHintCooldownDuration();
         const remaining = HINT_COOLDOWN - (Date.now() - startTime);
         
         if (remaining <= 0) {
@@ -1032,7 +1060,7 @@
     // 8. Router based on URL parameter ?id= and localStorage state
     function routeCurrentPhase() {
       const urlParams = new URLSearchParams(window.location.search);
-      const currentFase = urlParams.get('id'); // Reading ?id= instead of ?fase=
+      const currentFase = urlParams.get('id'); // Reading ?id=
       const state = loadState();
 
       // If no phase parameter is present, show welcome preparation screen
@@ -1116,7 +1144,6 @@
         {
           faseId: 'omega',
           nextFaseId: 'prisma',
-          cooldownMin: 30,
           formId: 'form-omega',
           inputId: 'input-omega',
           answer: 'mapa',
@@ -1126,7 +1153,6 @@
         {
           faseId: 'prisma',
           nextFaseId: 'aurora',
-          cooldownMin: 45,
           formId: 'form-prisma',
           inputId: 'input-prisma',
           answer: 'foto',
@@ -1137,7 +1163,6 @@
         {
           faseId: 'aurora',
           nextFaseId: 'nexus',
-          cooldownMin: 60,
           formId: 'form-aurora',
           inputId: 'input-aurora',
           answer: 'cafe',
@@ -1147,7 +1172,6 @@
         {
           faseId: 'nexus',
           nextFaseId: null,
-          cooldownMin: 0,
           formId: 'form-nexus',
           inputId: 'input-nexus',
           answer: 'mapafotocafe',
@@ -1171,9 +1195,9 @@
             const state = loadState();
             state.completed[cfg.faseId] = true;
             
-            // Set cooldown timer for the next phase
+            // Set exact unlock time for the next phase
             if (cfg.nextFaseId) {
-              state.unlock_time[cfg.nextFaseId] = Date.now() + (cfg.cooldownMin * 60 * 1000);
+              state.unlock_time[cfg.nextFaseId] = getUnlockTime(cfg.nextFaseId, Date.now());
             }
             saveState(state);
 
