@@ -659,7 +659,7 @@
     </main>
 
     <footer class="game-footer">
-      <p>&copy; 2026 Operação Caça ao Tesouro | <a href="#" id="reset-game-btn">Reiniciar</a></p>
+      <p>&copy; 2026 Operação Caça ao Tesouro<span id="reset-link-wrapper" class="hidden"> | <a href="#" id="reset-game-btn">Reiniciar</a></span></p>
     </footer>
   </div>
 
@@ -1428,6 +1428,13 @@
           window.location.search = `?id=${nextVal}`;
         };
       });
+
+      // Show reset link only if ?debug=1 or ?reset=1 is present in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('debug') === '1' || urlParams.get('reset') === '1') {
+        const resetWrapper = document.getElementById('reset-link-wrapper');
+        if (resetWrapper) resetWrapper.classList.remove('hidden');
+      }
 
       // Reset button implementation
       document.getElementById('reset-game-btn').addEventListener('click', (e) => {
