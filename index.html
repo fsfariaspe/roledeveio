@@ -1030,6 +1030,13 @@
     function startHintCountdown(faseId) {
       if (hintTimerInterval) clearInterval(hintTimerInterval);
       
+      // Ensure hint_timer_start is persisted to localStorage immediately
+      let initSt = loadState();
+      if (!initSt.hint_timer_start[faseId]) {
+        initSt.hint_timer_start[faseId] = Date.now();
+        saveState(initSt);
+      }
+      
       function update() {
         const state = loadState();
         const unlockedCount = state.hints_unlocked[faseId] || 1;
@@ -1039,7 +1046,12 @@
           return;
         }
         
-        const startTime = state.hint_timer_start[faseId] || Date.now();
+        if (!state.hint_timer_start[faseId]) {
+          state.hint_timer_start[faseId] = Date.now();
+          saveState(state);
+        }
+        
+        const startTime = state.hint_timer_start[faseId];
         const HINT_COOLDOWN = getHintCooldownDuration();
         const remaining = HINT_COOLDOWN - (Date.now() - startTime);
         
