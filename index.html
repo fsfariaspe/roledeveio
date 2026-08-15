@@ -885,13 +885,16 @@
 
     // 6. In-Phase Sequential Hints Engine
     function updateHintUnlockState(faseId, state) {
+      let changed = false;
       if (!state.hints_unlocked[faseId]) {
         state.hints_unlocked[faseId] = 1;
         state.hint_timer_start[faseId] = Date.now();
-        return true;
+        changed = true;
+      } else if (!state.hint_timer_start[faseId]) {
+        state.hint_timer_start[faseId] = Date.now();
+        changed = true;
       }
       
-      let changed = false;
       const HINT_COOLDOWN = getHintCooldownDuration();
       
       while (state.hints_unlocked[faseId] < 3) {
