@@ -590,6 +590,34 @@
           </form>
         </div>
 
+        <!-- Stage 2: Master Password Solved -> Instruct to send xarr on WhatsApp -->
+        <div id="nexus-stage2-container" class="form-container hidden" style="text-align: center;">
+          <div class="phase-tag" style="background-color: rgba(16, 185, 129, 0.12); color: var(--success); margin-bottom: 0.5rem;">Senha Mestra Confirmada!</div>
+          <p style="font-size: 1.125rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">🎉 PARABÉNS! VOCÊ COMBINOU AS 3 CHAVES COM PERFEIÇÃO!</p>
+          <p style="color: var(--text-muted); font-size: 0.938rem; line-height: 1.6; margin-bottom: 1.25rem;">
+            Para solicitar o <strong>Código de Liberação do Cofre Final</strong>, envie a mensagem abaixo para o número de suporte no WhatsApp:
+          </p>
+          <div style="background-color: rgba(255,255,255,0.05); border: 1px solid var(--accent); padding: 0.875rem; border-radius: 0.75rem; font-size: 1.5rem; font-weight: 900; color: var(--accent); letter-spacing: 0.15em; text-align: center; margin-bottom: 1.25rem;">
+            xarr
+          </div>
+          <form id="form-nexus-final-code" class="input-field-group" style="border-top: 1px dashed var(--input-border); padding-top: 1.25rem;">
+            <label for="input-nexus-final-code">Código de Liberação Final</label>
+            <input type="text" id="input-nexus-final-code" autocomplete="off" placeholder="Digite o código enviado no WhatsApp..." required>
+            <button type="submit" class="btn-submit" style="margin-top: 0.5rem; background-color: var(--success); color: var(--bg-main);">Destravar Cofre Final</button>
+          </form>
+        </div>
+
+        <!-- Stage 3: Release Code Entered -> 2-Minute Live Countdown -->
+        <div id="nexus-stage3-container" class="form-container hidden" style="text-align: center;">
+          <div class="phase-tag" style="background-color: rgba(245, 158, 11, 0.12); color: var(--accent); margin-bottom: 0.5rem;">Abertura Iminente</div>
+          <p style="font-size: 1.25rem; font-weight: 800; color: var(--accent); margin-bottom: 0.5rem;">🎬 PREPARE A CÂMERA E REÚNA TODOS!</p>
+          <p style="color: var(--text-muted); font-size: 0.938rem; line-height: 1.6; margin-bottom: 1rem;">
+            Sentem-se todos ao redor do sofá da sala e liguem a câmera para gravar esse momento!
+          </p>
+          <p style="color: var(--text-muted); font-size: 0.813rem; text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem;">A porta do cofre será aberta em:</p>
+          <div id="nexus-countdown-timer" style="font-size: 3.25rem; font-weight: 900; color: var(--accent); font-variant-numeric: tabular-nums; text-shadow: 0 0 15px rgba(245, 158, 11, 0.4); margin-bottom: 0.5rem;">02:00</div>
+        </div>
+
         <div id="success-container-nexus" class="success-container">
           <!-- Opening Door SVG (3D perspective swing) -->
           <svg class="svg-illustration door-svg" viewBox="0 0 200 200" width="170" height="170" xmlns="http://www.w3.org/2000/svg" style="perspective: 600px;">
@@ -639,6 +667,7 @@
     const STATE_KEY = 'caca_tesouro_state_v3'; // Unique key to force update state structure
     let timerInterval = null;
     let hintTimerInterval = null;
+    let nexusCountdownInterval = null;
 
     // 1. Game static configuration (answers, hints and challenges per phase based on travel itinerary)
     const phasesData = {
@@ -707,9 +736,9 @@
         nextId: null,
         answer: 'mapafotocafe',
         hints: [
-          "Qual é a Senha Mestra?",
-          "Junte as 3 chaves que você encontrou na ordem das fases (sem espaços).",
-          "mapa + foto + café"
+          "A Senha Mestra não é uma palavra nova. Ela é a fusão de tudo o que você descobriu ao longo da sua jornada...",
+          "Lembre-se das 3 chaves que você encontrou: o papel que te guia (Fase 1), a imagem congelada no tempo (Fase 2) e a bebida quente da serra (Fase 3).",
+          "Junte os nomes dos 3 objetos na ordem exata das fases, em uma única palavra (sem espaços ou acentos)."
         ],
         challenges: []
       }
@@ -1063,6 +1092,51 @@
       }
     }
 
+
+
+    function startNexusCountdown() {
+      if (nexusCountdownInterval) clearInterval(nexusCountdownInterval);
+      
+      function update() {
+        const state = loadState();
+        const startTime = state.nexus_timer_start || Date.now();
+        const COUNTDOWN_MS = 2 * 60 * 1000; // 2 minutes (120,000 ms)
+        const remaining = COUNTDOWN_MS - (Date.now() - startTime);
+        
+        if (remaining <= 0) {
+          clearInterval(nexusCountdownInterval);
+          
+          state.nexus_stage = 3;
+          state.completed['nexus'] = true;
+          saveState(state);
+          
+          const stage3 = document.getElementById('nexus-stage3-container');
+          if (stage3) stage3.classList.add('hidden');
+          
+          const successContainer = document.getElementById('success-container-nexus');
+          if (successContainer) {
+            successContainer.classList.remove('hidden');
+            void successContainer.offsetWidth;
+            successContainer.classList.add('active');
+            triggerSuccessAnimations('nexus');
+          }
+          return;
+        }
+        
+        const el = document.getElementById('nexus-countdown-timer');
+        if (el) {
+          const minutes = Math.floor(remaining / (60 * 1000));
+          const seconds = Math.floor((remaining % (60 * 1000)) / 1000);
+          const minStr = String(minutes).padStart(2, '0');
+          const secStr = String(seconds).padStart(2, '0');
+          el.innerText = `${minStr}:${secStr}`;
+        }
+      }
+      
+      update();
+      nexusCountdownInterval = setInterval(update, 1000);
+    }
+
     // 8. Router based on URL parameter ?id= and localStorage state
     function routeCurrentPhase() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -1115,9 +1189,44 @@
           showLockScreen('nexus');
           return;
         }
+
+        // Special multi-stage routing for nexus phase
+        const formContainer = document.getElementById('form-container-nexus');
+        const stage2 = document.getElementById('nexus-stage2-container');
+        const stage3 = document.getElementById('nexus-stage3-container');
+        const successContainer = document.getElementById('success-container-nexus');
+        
+        [formContainer, stage2, stage3, successContainer].forEach(el => {
+          if (el) {
+            el.classList.add('hidden');
+            el.classList.remove('active');
+          }
+        });
+        
+        const stage = state.nexus_stage || 0;
+        if (state.completed['nexus'] || stage === 3) {
+          if (successContainer) {
+            successContainer.classList.remove('hidden');
+            void successContainer.offsetWidth;
+            successContainer.classList.add('active');
+            triggerSuccessAnimations('nexus');
+          }
+        } else if (stage === 2) {
+          if (stage3) stage3.classList.remove('hidden');
+          startNexusCountdown();
+        } else if (stage === 1) {
+          if (stage2) stage2.classList.remove('hidden');
+        } else {
+          if (formContainer) formContainer.classList.remove('hidden');
+          renderHints('nexus');
+          startHintCountdown('nexus');
+        }
+
+        showScreen('nexus');
+        return;
       }
 
-      // Render correct active panel
+      // Render correct active panel for standard phases
       const formContainer = document.getElementById(`form-container-${currentFase}`);
       const successContainer = document.getElementById(`success-container-${currentFase}`);
 
@@ -1182,10 +1291,51 @@
           inputId: 'input-nexus',
           answer: 'mapafotocafe',
           formContainerId: 'form-container-nexus',
-          successContainerId: 'success-container-nexus',
-          onSuccess: () => triggerSuccessAnimations('nexus')
+          successContainerId: 'nexus-stage2-container',
+          onSuccess: () => {
+            const state = loadState();
+            state.nexus_stage = 1;
+            state.completed['nexus'] = false;
+            saveState(state);
+          }
         }
       ];
+
+      // Final code validation handler for nexus stage 2
+      const formFinalCode = document.getElementById('form-nexus-final-code');
+      if (formFinalCode) {
+        formFinalCode.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const input = document.getElementById('input-nexus-final-code');
+          const val = sanitizeInput(input.value);
+          
+          const validCodes = ['cheguei', 'tesouro2026', 'home2026', 'xarr', 'abrir', 'liberar', 'tesouro'];
+          
+          if (validCodes.includes(val)) {
+            const state = loadState();
+            state.nexus_stage = 2;
+            state.nexus_timer_start = Date.now();
+            saveState(state);
+            
+            const stage2 = document.getElementById('nexus-stage2-container');
+            stage2.classList.add('fade-out');
+            setTimeout(() => {
+              stage2.classList.add('hidden');
+              stage2.classList.remove('fade-out');
+              
+              const stage3 = document.getElementById('nexus-stage3-container');
+              if (stage3) stage3.classList.remove('hidden');
+              startNexusCountdown();
+            }, 400);
+          } else {
+            input.classList.remove('shake');
+            void input.offsetWidth;
+            input.classList.add('shake');
+            input.value = '';
+            setTimeout(() => { input.classList.remove('shake'); }, 400);
+          }
+        });
+      }
 
       validatorConfigs.forEach(cfg => {
         const form = document.getElementById(cfg.formId);
