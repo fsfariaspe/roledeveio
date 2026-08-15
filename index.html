@@ -1205,6 +1205,9 @@
           return;
         }
 
+        // Show screen container first to clear old timers
+        showScreen('nexus');
+
         // Special multi-stage routing for nexus phase
         const formContainer = document.getElementById('form-container-nexus');
         const stage2 = document.getElementById('nexus-stage2-container');
@@ -1237,9 +1240,11 @@
           startHintCountdown('nexus');
         }
 
-        showScreen('nexus');
         return;
       }
+
+      // Show active screen container first for standard phases
+      showScreen(currentFase);
 
       // Render correct active panel for standard phases
       const formContainer = document.getElementById(`form-container-${currentFase}`);
@@ -1264,8 +1269,6 @@
         renderHints(currentFase);
         startHintCountdown(currentFase);
       }
-
-      showScreen(currentFase);
     }
 
     // 9. Enigmas validation setup
